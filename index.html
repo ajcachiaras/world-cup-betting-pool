@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>World Cup 2026 Betting Pool</title>
+    <style>
+        :root {
+            --primary-color: #4F2683; /* Deep Purple */
+            --accent-color: #FFC62F;  /* Gold */
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+            --text-main: #1a1a1a;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding: 20px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.5em;
+            color: var(--primary-color);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 30px;
+        }
+
+        h2.section-title {
+            color: var(--text-main);
+            margin-top: 40px;
+            margin-bottom: 20px;
+            border-bottom: 3px solid var(--accent-color);
+            display: inline-block;
+            padding-bottom: 5px;
+        }
+
+        /* --- NAVIGATION STYLES --- */
+        .nav-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .nav-btn {
+            background-color: var(--card-bg);
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            padding: 12px 24px;
+            font-size: 1em;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .nav-btn:hover { background-color: #f0e6fa; }
+
+        .nav-btn.active {
+            background-color: var(--primary-color);
+            color: #ffffff;
+            border-color: var(--primary-color);
+            box-shadow: 0 4px 10px rgba(79, 38, 131, 0.3);
+        }
+
+        /* --- PAGE CONTAINER STYLES --- */
+        .page-content { display: none; animation: fadeIn 0.3s ease-in-out; }
+        .page-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- IFRAME STYLES --- */
+        .iframe-wrapper, .chart-wrapper {
+            background: var(--card-bg);
+            padding: 10px;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+        .sheet-iframe { width: 100%; height: 700px; border: none; border-radius: 8px; }
+        .chart-wrapper iframe { width: 100%; height: 400px; border: none; border-radius: 8px; }
+
+        /* --- DASHBOARD CARD STYLES --- */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+        }
+
+        .manager-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+            border-top: 6px solid var(--primary-color);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer; /* Makes it clear you can click it */
+        }
+
+        /* Highlight effect when hovering over the card */
+        .manager-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 25px rgba(0,0,0,0.15);
+            border-top: 6px solid var(--accent-color);
+        }
+
+        .rank-badge {
+            position: absolute; top: 15px; right: 15px;
+            background: var(--accent-color); color: #000;
+            font-weight: bold; padding: 5px 12px;
+            border-radius: 20px; font-size: 0.8em; display: none; 
+        }
+
+        .manager-name { font-size: 1.8em; font-weight: 800; color: var(--primary-color); margin: 0 0 5px 0; }
+        .total-points { font-size: 2.5em; font-weight: 900; color: #1a1a1a; margin: 10px 0 20px 0; line-height: 1; }
+        .total-points span { font-size: 0.35em; color: #888; font-weight: normal; text-transform: uppercase; letter-spacing: 1px; display: block; }
+        .stat-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee; font-size: 0.9em; }
+        .stat-row:last-child { border-bottom: none; }
+        .stat-label { color: #666; font-weight: 500; }
+        .stat-value { font-weight: 700; color: #222; }
+        .loading-text { text-align: center; width: 100%; font-weight: bold; color: var(--primary-color); }
+
+        /* --- MODAL (POPUP) STYLES --- */
+        .modal-overlay {
+            display: none; /* Hidden by default */
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 1000;
+            justify-content: center; align-items: center; padding: 20px;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            width: 100%; max-width: 900px; max-height: 85vh;
+            border-radius: 16px; padding: 30px;
+            overflow-y: auto; position: relative;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .close-btn {
+            position: absolute; top: 20px; right: 20px;
+            background: #eee; color: #333; border: none;
+            border-radius: 50%; width: 35px; height: 35px;
+            font-size: 1.2em; font-weight: bold; cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .close-btn:hover { background: #ddd; }
+
+        .modal-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr; /* Matchups get more space than teams */
+            gap: 30px; margin-top: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .modal-grid { grid-template-columns: 1fr; } /* Stack on phones */
+        }
+
+        .modal-table { width: 100%; border-collapse: collapse; font-size: 0.9em; }
+        .modal-table th, .modal-table td { padding: 10px; border-bottom: 1px solid #eee; text-align: left; }
+        .modal-table th { background: var(--primary-color); color: white; position: sticky; top: 0; }
+        .modal-table tr:hover { background: #f9f9f9; }
+        
+        /* Highlighting the active manager's team in the matchups */
+        .highlight-team { color: var(--primary-color); font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <h1>World Cup 2026</h1>
+
+    <div class="nav-container">
+        <button class="nav-btn active" onclick="switchPage('page-leaderboard', this)">Leaderboard</button>
+        <button class="nav-btn" onclick="switchPage('page-matrix', this)">Matchup Matrix</button>
+        <button class="nav-btn" onclick="switchPage('page-groups', this)">Groups</button>
+    </div>
+
+    <div id="page-leaderboard" class="page-content active">
+        <div class="card-grid" id="dashboard-container">
+            <p class="loading-text">Fetching live leaderboard data...</p>
+        </div>
+
+        <h2 class="section-title">Visualized Data</h2>
+        <div class="chart-wrapper">
+            <iframe width="512" height="531" seamless frameborder="0" scrolling="no" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vQn89D6q684W43YSe7TfH-LFaK7Pmmv9UJMl4ASNj6_kZO1C_eUo41hxHm2mDiQRIlgKwUU-6-41AI6/pubchart?oid=1586620139&amp;format=interactive"></iframe>
+            <iframe width="856" height="531" seamless frameborder="0" scrolling="no" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vQn89D6q684W43YSe7TfH-LFaK7Pmmv9UJMl4ASNj6_kZO1C_eUo41hxHm2mDiQRIlgKwUU-6-41AI6/pubchart?oid=941849445&amp;format=interactive"></iframe>
+        </div>
+    </div>
+
+    <div id="page-matrix" class="page-content">
+        <div class="iframe-wrapper">
+            <iframe class="sheet-iframe" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vQn89D6q684W43YSe7TfH-LFaK7Pmmv9UJMl4ASNj6_kZO1C_eUo41hxHm2mDiQRIlgKwUU-6-41AI6/pubhtml?gid=182549411&single=true&widget=true&headers=false&chrome=false"></iframe>
+        </div>
+    </div>
+
+    <div id="page-groups" class="page-content">
+        <div class="iframe-wrapper">
+            <iframe class="sheet-iframe" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vQn89D6q684W43YSe7TfH-LFaK7Pmmv9UJMl4ASNj6_kZO1C_eUo41hxHm2mDiQRIlgKwUU-6-41AI6/pubhtml?gid=812512607&single=true&widget=true&headers=false&chrome=false"></iframe>
+        </div>
+    </div>
+
+    <div id="manager-modal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal()">×</button>
+            <h2 id="modal-title" style="color: var(--primary-color); margin-top: 0; border-bottom: 2px solid var(--accent-color); padding-bottom: 10px;">Manager Portfolio</h2>
+            
+            <div class="modal-grid">
+                <div>
+                    <h3 style="margin-top:0;">Owned Teams</h3>
+                    <div id="modal-teams-container">Loading...</div>
+                </div>
+                <div>
+                    <h3 style="margin-top:0;">Matchup History</h3>
+                    <div id="modal-matchups-container">Loading...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA LINKS ---
+        const leaderboardCsvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQn89D6q684W43YSe7TfH-LFaK7Pmmv9UJMl4ASNj6_kZO1C_eUo41hxHm2mDiQRIlgKwUU-6-41AI6/pub?gid=839672240&single=true&output=csv';
+        
+        // 🚨 PASTE YOUR TWO NEW CSV LINKS HERE 🚨
+        const teamsCsvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQn89D6q684W43YSe7TfH-LFaK7Pmmv9UJMl4ASNj6_kZO1C_eUo41hxHm2mDiQRIlgKwUU-6-41AI6/pub?gid=1903481378&single=true&output=csv';
+        const gameLogCsvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQn89D6q684W43YSe7TfH-LFaK7Pmmv9UJMl4ASNj6_kZO1C_eUo41hxHm2mDiQRIlgKwUU-6-41AI6/pub?gid=182549411&single=true&output=csv';
+
+        // --- TAB SWITCHING ---
+        function switchPage(pageId, clickedButton) {
+            document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            clickedButton.classList.add('active');
+        }
+
+        // --- BUILD LEADERBOARD CARDS ---
+        async function buildDashboard() {
+            try {
+                const response = await fetch(leaderboardCsvUrl);
+                const data = await response.text();
+                const rows = data.split('\n');
+                const container = document.getElementById('dashboard-container');
+                container.innerHTML = ''; 
+                
+                for (let i = 1; i < rows.length; i++) {
+                    const cols = rows[i].split(',');
+                    if (cols.length > 1) { 
+                        const managerName = cols[0].trim();
+                        if (managerName === "Tournament Progress") break; 
+
+                        const points = cols[1].trim();
+                        const teams = cols[2].trim();
+                        const gamesPlayed = cols[3].trim();
+                        const pointsPerGame = cols[5] ? cols[5].trim() : '0.0'; 
+
+                        // Notice the new onclick="openModal('Name')" added to the card div
+                        const cardHtml = `
+                            <div class="manager-card" onclick="openModal('${managerName}')">
+                                <div class="rank-badge" style="display: ${i === 1 ? 'block' : 'none'}">🏆 1st Place</div>
+                                <h2 class="manager-name">${managerName}</h2>
+                                <div class="total-points">${points}<span>Total Points</span></div>
+                                <div class="stat-row"><span class="stat-label">Teams Owned</span><span class="stat-value">${teams}</span></div>
+                                <div class="stat-row"><span class="stat-label">Games Played</span><span class="stat-value">${gamesPlayed}</span></div>
+                                <div class="stat-row"><span class="stat-label">Points / Game</span><span class="stat-value">${pointsPerGame}</span></div>
+                            </div>
+                        `;
+                        container.innerHTML += cardHtml;
+                    }
+                }
+            } catch (error) {
+                console.error(error);
+                document.getElementById('dashboard-container').innerHTML = '<p class="loading-text">Error loading live data.</p>';
+            }
+        }
+
+        // --- MODAL LOGIC ---
+        async function openModal(managerName) {
+            // Show the modal window
+            document.getElementById('manager-modal').style.display = 'flex';
+            document.getElementById('modal-title').textContent = managerName + "'s Portfolio";
+            document.getElementById('modal-teams-container').innerHTML = '<i>Fetching teams...</i>';
+            document.getElementById('modal-matchups-container').innerHTML = '<i>Fetching matchups...</i>';
+
+            try {
+                // 1. FETCH AND BUILD TEAMS TABLE
+                const teamRes = await fetch(teamsCsvUrl);
+                const teamData = await teamRes.text();
+                const teamRows = teamData.split('\n');
+                const teamHeaders = teamRows[0].split(',');
+                
+                let teamColIndex = -1;
+                let bidColIndex = -1;
+
+                // Find which columns belong to this manager (e.g., "Jon Teams", "Jon Bids")
+                for(let i = 0; i < teamHeaders.length; i++){
+                    if(teamHeaders[i].includes(managerName + " Teams")) teamColIndex = i;
+                    if(teamHeaders[i].includes(managerName + " Bids")) bidColIndex = i;
+                }
+
+                let teamsHtml = '<table class="modal-table"><tr><th>Team</th><th>Purchased For</th></tr>';
+                for(let i = 1; i < teamRows.length; i++){
+                    let cols = teamRows[i].split(',');
+                    // If this manager has a team listed in this row, add it to the table
+                    if(teamColIndex > -1 && cols[teamColIndex] && cols[teamColIndex].trim() !== '') {
+                        let teamName = cols[teamColIndex].trim();
+                        let bidPrice = bidColIndex > -1 ? cols[bidColIndex].trim() : '-';
+                        teamsHtml += `<tr><td>${teamName}</td><td>${bidPrice}</td></tr>`;
+                    }
+                }
+                teamsHtml += '</table>';
+                document.getElementById('modal-teams-container').innerHTML = teamsHtml;
+
+
+                // 2. FETCH AND BUILD MATCHUPS TABLE
+                const gameRes = await fetch(gameLogCsvUrl);
+                const gameData = await gameRes.text();
+                const gameRows = gameData.split('\n');
+                
+                let matchupsHtml = '<table class="modal-table"><tr><th>Group</th><th>Matchup</th><th>Score</th></tr>';
+                
+                for(let i = 1; i < gameRows.length; i++){
+                    let cols = gameRows[i].split(',');
+                    
+                    if(cols.length > 8) {
+                        let group = cols[0].trim();
+                        let team1 = cols[1].trim();
+                        let owner1 = cols[3].trim();
+                        let goals1 = cols[4] ? cols[4].trim() : '';
+                        
+                        let team2 = cols[5].trim();
+                        let owner2 = cols[7].trim();
+                        let goals2 = cols[8] ? cols[8].trim() : '';
+
+                        // Only show the game if this manager owns Team 1 OR Team 2
+                        if(owner1 === managerName || owner2 === managerName) {
+                            
+                            // Highlight the team owned by the manager currently being viewed
+                            let t1Display = owner1 === managerName ? `<span class="highlight-team">${team1}</span>` : team1;
+                            let t2Display = owner2 === managerName ? `<span class="highlight-team">${team2}</span>` : team2;
+                            
+                            // Format the score, or show 'vs' if the game hasn't happened yet
+                            let scoreDisplay = (goals1 !== '' && goals2 !== '') ? `<b>${goals1} - ${goals2}</b>` : '<span style="color:#888;">vs</span>';
+                            
+                            matchupsHtml += `
+                                <tr>
+                                    <td>${group}</td>
+                                    <td>${t1Display} <br> <small>vs</small> ${t2Display}</td>
+                                    <td style="text-align:center; font-size:1.1em;">${scoreDisplay}</td>
+                                </tr>
+                            `;
+                        }
+                    }
+                }
+                matchupsHtml += '</table>';
+                document.getElementById('modal-matchups-container').innerHTML = matchupsHtml;
+
+            } catch (e) {
+                console.error(e);
+                document.getElementById('modal-teams-container').innerHTML = '<p style="color:red;">Error connecting to Teams tab.</p>';
+                document.getElementById('modal-matchups-container').innerHTML = '<p style="color:red;">Error connecting to GameLog tab.</p>';
+            }
+        }
+
+        // --- CLOSE MODAL ---
+        function closeModal() {
+            document.getElementById('manager-modal').style.display = 'none';
+        }
+
+        // Allows closing the modal by clicking anywhere in the dark background
+        window.onclick = function(event) {
+            let modal = document.getElementById('manager-modal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+
+        // Initialize
+        buildDashboard();
+    </script>
+
+</body>
+</html>
