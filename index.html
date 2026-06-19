@@ -331,12 +331,12 @@
 
 <body>
 
-    <h1>World Cup 2026</h1>
+    <h1>World Cup 2026 Betting Pool</h1>
 
     <div class="nav-container">
         <button class="nav-btn" onclick="switchPage('page-rules', this)">Rules</button>
         <button class="nav-btn active" onclick="switchPage('page-leaderboard', this)">Leaderboard</button>
-        <button class="nav-btn" onclick="switchPage('page-matrix', this)">Matchup Matrix</button>
+        <button class="nav-btn" onclick="switchPage('page-matrix', this)">Game Log</button>
         <button class="nav-btn" onclick="switchPage('page-groups', this)">Groups</button>
         <button class="nav-btn" onclick="switchPage('page-auction', this)">Auction</button>
     </div>
@@ -353,6 +353,17 @@
             <iframe width="856" height="531" seamless frameborder="0" scrolling="no"
                 src="https://docs.google.com/spreadsheets/d/e/2PACX-1vQn89D6q684W43YSe7TfH-LFaK7Pmmv9UJMl4ASNj6_kZO1C_eUo41hxHm2mDiQRIlgKwUU-6-41AI6/pubchart?oid=941849445&amp;format=interactive"></iframe>
         </div>
+
+        <h2 class="section-title">Matchup Matrix</h2>
+        <div class="iframe-wrapper" style="overflow-x: auto; padding: 0;">
+            <table id="leaderboard-matrix" class="modal-table" style="white-space: nowrap; margin: 0 auto;">
+                <tr>
+                    <td>
+                        <p class="loading-text">Fetching matrix...</p>
+                    </td>
+                </tr>
+            </table>
+        </div>
     </div>
 
     <div id="page-matrix" class="page-content">
@@ -365,7 +376,7 @@
     <div id="page-groups" class="page-content">
         <div class="iframe-wrapper">
             <iframe class="sheet-iframe"
-                src="https://docs.google.com/spreadsheets/d/e/2PACX-1vQn89D6q684W43YSe7TfH-LFaK7Pmmv9UJMl4ASNj6_kZO1C_eUo41hxHm2mDiQRIlgKwUU-6-41AI6/pubhtml?gid=812512607&single=true&widget=true&headers=false&chrome=false"></iframe>
+                src="https://docs.google.com/spreadsheets/d/e/2PACX-1vQn89D6q684W43YSe7TfH-LFaK7Pmmv9UJMl4ASNj6_kZO1C_eUo41hxHm2mDiQRIlgKwUU-6-41AI6/pubhtml?gid=134138082&single=true&widget=true&headers=false&chrome=false"></iframe>
         </div>
     </div>
 
@@ -462,6 +473,76 @@
                         `;
                         container.innerHTML += cardHtml;
                     }
+                }
+
+                // Build Matchup Matrix
+                let matrixColIdx = rows[0].split(',').findIndex(c => c.trim() === 'Matchup Matrix');
+                if (matrixColIdx !== -1) {
+                    let hCols = rows[0].split(',');
+
+                    // First pass: Extract data and find min/max
+                    let matrixData = [];
+                    let minVal = Infinity;
+                    let maxVal = -Infinity;
+
+                    for (let i = 1; i < rows.length; i++) {
+                        const cols = rows[i].split(',');
+                        if (cols.length > matrixColIdx) {
+                            let mName = cols[matrixColIdx].trim();
+
+                            if (!mName) continue;
+                            if (mName === "Tournament Progress") break;
+
+                            let rowVals = [];
+                            for (let c = 1; c <= 4; c++) {
+                                let valStr = cols[matrixColIdx + c] ? cols[matrixColIdx + c].trim() : '';
+                                let val = parseFloat(valStr);
+
+                                rowVals.push({ valStr, val });
+
+                                if (!isNaN(val)) {
+                                    if (val < minVal) minVal = val;
+                                    if (val > maxVal) maxVal = val;
+                                }
+                            }
+                            matrixData.push({ mName, rowVals });
+                        }
+                    }
+
+                    if (minVal === Infinity) { minVal = 0; maxVal = 10; }
+                    let range = maxVal - minVal;
+                    if (range === 0) range = 1;
+
+                    let matrixHtml = '<thead><tr>';
+                    // Header
+                    matrixHtml += `<th style="text-align: left;">${hCols[matrixColIdx].trim()}</th>`;
+                    for (let c = 1; c <= 4; c++) {
+                        let opName = hCols[matrixColIdx + c] ? hCols[matrixColIdx + c].trim() : '';
+                        let mColors = managerColors[opName] || { bg: '#eee', border: '#ccc' };
+                        matrixHtml += `<th style="background-color: ${mColors.bg}; color: #333; text-align: center; border-bottom: 2px solid ${mColors.border};">${opName}</th>`;
+                    }
+                    matrixHtml += '</tr></thead><tbody>';
+
+                    for (let r = 0; r < matrixData.length; r++) {
+                        let row = matrixData[r];
+                        let mColors = managerColors[row.mName] || { bg: '#eee', border: '#ccc' };
+                        matrixHtml += `<tr>`;
+                        matrixHtml += `<td style="font-weight: bold; background-color: ${mColors.bg}; border-right: 2px solid ${mColors.border};">${row.mName}</td>`;
+
+                        for (let c = 0; c < row.rowVals.length; c++) {
+                            let cell = row.rowVals[c];
+                            let hue = 60;
+                            if (!isNaN(cell.val)) {
+                                hue = ((cell.val - minVal) / range) * 120;
+                            }
+                            let bgColor = `hsl(${hue}, 85%, 88%)`;
+                            matrixHtml += `<td style="text-align: center; font-weight: bold; font-size: 1.1em; background-color: ${bgColor};">${cell.valStr}</td>`;
+                        }
+                        matrixHtml += `</tr>`;
+                    }
+                    matrixHtml += '</tbody>';
+                    const matrixContainer = document.getElementById('leaderboard-matrix');
+                    if (matrixContainer) matrixContainer.innerHTML = matrixHtml;
                 }
             } catch (error) {
                 console.error(error);
@@ -585,14 +666,14 @@
                 const response = await fetch(rulesCsvUrl);
                 const data = await response.text();
                 const rows = data.split('\n');
-                
+
                 let html = '';
                 let inTable = false;
-                
+
                 for (let i = 0; i < rows.length; i++) {
                     let row = rows[i].trim();
                     if (!row || row === ',,') continue;
-                    
+
                     let cols = [];
                     let cur = '';
                     let inQuotes = false;
@@ -603,14 +684,15 @@
                         else cur += c;
                     }
                     cols.push(cur.trim());
-                    
+
                     if (cols[0].startsWith('⚽')) {
                         continue;
                     } else if (cols[0].startsWith('Scoring Rules')) {
                         html += `<p style="text-align:center; color: #666; font-size: 1.2em; margin-bottom: 30px;">${cols[0]}</p>`;
                     } else if (cols[0].match(/^[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}]/u) && !cols[0].startsWith('ℹ️')) {
                         if (inTable) { html += '</table></div>'; inTable = false; }
-                        html += `<h2 class="section-title" style="display:block; text-align:left;">${cols[0]}</h2>`;
+                        let titleText = cols[0].replace(/^[\p{Emoji_Presentation}\p{Extended_Pictographic}\u{2600}-\u{26FF}\s]+/gu, '').trim();
+                        html += `<h2 class="section-title" style="display:block; text-align:left;">${titleText}</h2>`;
                     } else if (cols[0] === 'Category' && cols[1] === 'Points') {
                         if (inTable) { html += '</table></div>'; }
                         html += `<div class="iframe-wrapper" style="padding: 0; overflow: hidden;"><table class="modal-table" style="margin:0;">
@@ -628,9 +710,9 @@
                     }
                 }
                 if (inTable) { html += '</table></div>'; }
-                
+
                 document.getElementById('rules-container').innerHTML = html;
-                
+
             } catch (e) {
                 console.error(e);
                 document.getElementById('rules-container').innerHTML = '<p class="loading-text" style="color:red;">Error loading rules.</p>';
