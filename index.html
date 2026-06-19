@@ -83,8 +83,32 @@
             box-shadow: 0 8px 16px rgba(0,0,0,0.05);
             margin-bottom: 20px;
         }
+
+        .chart-wrapper {
+            overflow-x: auto; /* Allows charts to scroll horizontally on mobile */
+            -webkit-overflow-scrolling: touch;
+        }
+
         .sheet-iframe { width: 100%; height: 700px; border: none; border-radius: 8px; }
-        .chart-wrapper iframe { width: 100%; height: 400px; border: none; border-radius: 8px; }
+        
+        .chart-wrapper iframe { 
+            border: none; 
+            border-radius: 8px; 
+            display: block;
+            margin: 0 auto 20px auto;
+        }
+
+        .chart-wrapper iframe:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Prevent centering overflow bug on small screens by left-aligning */
+        @media (max-width: 900px) {
+            .chart-wrapper iframe {
+                margin-left: 0;
+                margin-right: 0;
+            }
+        }
 
         /* --- DASHBOARD CARD STYLES --- */
         .card-grid {
@@ -253,11 +277,20 @@
                 const container = document.getElementById('dashboard-container');
                 container.innerHTML = ''; 
                 
+                const managerBgColors = {
+                    'Jon': '#fce8e6',   // Light Red
+                    'Yeon': '#fef7e0',  // Light Yellow
+                    'Andrew': '#e8f0fe',// Light Blue
+                    'Wyatt': '#e6f4ea'  // Light Green
+                };
+
                 for (let i = 1; i < rows.length; i++) {
                     const cols = rows[i].split(',');
                     if (cols.length > 1) { 
                         const managerName = cols[0].trim();
                         if (managerName === "Tournament Progress") break; 
+                        
+                        const bgStyle = managerBgColors[managerName] ? `background-color: ${managerBgColors[managerName]};` : '';
 
                         const points = cols[1].trim();
                         const teams = cols[2].trim();
@@ -266,7 +299,7 @@
 
                         // Notice the new onclick="openModal('Name')" added to the card div
                         const cardHtml = `
-                            <div class="manager-card" onclick="openModal('${managerName}')">
+                            <div class="manager-card" style="${bgStyle}" onclick="openModal('${managerName}')">
                                 <div class="rank-badge" style="display: ${i === 1 ? 'block' : 'none'}">🏆 1st Place</div>
                                 <h2 class="manager-name">${managerName}</h2>
                                 <div class="total-points">${points}<span>Total Points</span></div>
@@ -327,7 +360,7 @@
                 const gameData = await gameRes.text();
                 const gameRows = gameData.split('\n');
                 
-                let matchupsHtml = '<table class="modal-table"><tr><th>Group</th><th>Matchup</th><th>Score</th></tr>';
+                let matchupsHtml = '<table class="modal-table"><tr><th>Group</th><th>Matchup</th><th>Score</th><th>Pts Earned</th></tr>';
                 
                 for(let i = 1; i < gameRows.length; i++){
                     let cols = gameRows[i].split(',');
@@ -345,6 +378,22 @@
                         // Only show the game if this manager owns Team 1 OR Team 2
                         if(owner1 === managerName || owner2 === managerName) {
                             
+                            let managerPts = 0;
+                            if (goals1 !== '' && cols.length > 14) {
+                                let pts1 = 0;
+                                let pts2 = 0;
+                                if (cols[9]) pts1 += Number(cols[9].trim()) || 0;
+                                if (cols[10]) pts1 += Number(cols[10].trim()) || 0;
+                                if (cols[11]) pts1 += Number(cols[11].trim()) || 0;
+                                
+                                if (cols[12]) pts2 += Number(cols[12].trim()) || 0;
+                                if (cols[13]) pts2 += Number(cols[13].trim()) || 0;
+                                if (cols[14]) pts2 += Number(cols[14].trim()) || 0;
+
+                                if (owner1 === managerName) managerPts += pts1;
+                                if (owner2 === managerName) managerPts += pts2;
+                            }
+
                             // Highlight the team owned by the manager currently being viewed
                             let t1Display = owner1 === managerName ? `<span class="highlight-team">${team1}</span>` : team1;
                             let t2Display = owner2 === managerName ? `<span class="highlight-team">${team2}</span>` : team2;
@@ -352,11 +401,23 @@
                             // Format the score, or show 'vs' if the game hasn't happened yet
                             let scoreDisplay = (goals1 !== '' && goals2 !== '') ? `<b>${goals1} - ${goals2}</b>` : '<span style="color:#888;">vs</span>';
                             
+                            // Format the points earned
+                            let ptsDisplay = (goals1 !== '' && goals2 !== '') ? `<b style="color:var(--primary-color)">+${managerPts}</b>` : '<span style="color:#888;">-</span>';
+
+                            let rowStyle = '';
+                            if (goals1 !== '' && goals2 !== '') {
+                                // Scale from 0 (red) to 120 (green) based on points (0 to 8+)
+                                let hue = Math.min(120, Math.max(0, (managerPts / 8) * 120));
+                                // Using 85% saturation and 88% lightness makes the oranges and yellow-greens pop much better!
+                                rowStyle = `style="background-color: hsl(${hue}, 85%, 88%);"`;
+                            }
+
                             matchupsHtml += `
-                                <tr>
+                                <tr ${rowStyle}>
                                     <td>${group}</td>
                                     <td>${t1Display} <br> <small>vs</small> ${t2Display}</td>
                                     <td style="text-align:center; font-size:1.1em;">${scoreDisplay}</td>
+                                    <td style="text-align:center; font-size:1.1em;">${ptsDisplay}</td>
                                 </tr>
                             `;
                         }
