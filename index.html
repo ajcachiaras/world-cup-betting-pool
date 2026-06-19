@@ -133,7 +133,6 @@
         .manager-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 15px 25px rgba(0,0,0,0.15);
-            border-top: 6px solid var(--accent-color);
         }
 
         .rank-badge {
@@ -277,11 +276,11 @@
                 const container = document.getElementById('dashboard-container');
                 container.innerHTML = ''; 
                 
-                const managerBgColors = {
-                    'Jon': '#fce8e6',   // Light Red
-                    'Yeon': '#fef7e0',  // Light Yellow
-                    'Andrew': '#e8f0fe',// Light Blue
-                    'Wyatt': '#e6f4ea'  // Light Green
+                const managerColors = {
+                    'Jon': { bg: '#fce8e6', border: '#ea4335' },     // Red
+                    'Yeon': { bg: '#fef7e0', border: '#fbbc04' },    // Yellow
+                    'Andrew': { bg: '#e8f0fe', border: '#4285f4' },  // Blue
+                    'Wyatt': { bg: '#e6f4ea', border: '#34a853' }    // Green
                 };
 
                 for (let i = 1; i < rows.length; i++) {
@@ -290,7 +289,8 @@
                         const managerName = cols[0].trim();
                         if (managerName === "Tournament Progress") break; 
                         
-                        const bgStyle = managerBgColors[managerName] ? `background-color: ${managerBgColors[managerName]};` : '';
+                        const mColors = managerColors[managerName];
+                        const cardStyle = mColors ? `background-color: ${mColors.bg}; border-top-color: ${mColors.border};` : '';
 
                         const points = cols[1].trim();
                         const teams = cols[2].trim();
@@ -299,7 +299,7 @@
 
                         // Notice the new onclick="openModal('Name')" added to the card div
                         const cardHtml = `
-                            <div class="manager-card" style="${bgStyle}" onclick="openModal('${managerName}')">
+                            <div class="manager-card" style="${cardStyle}" onclick="openModal('${managerName}')">
                                 <div class="rank-badge" style="display: ${i === 1 ? 'block' : 'none'}">🏆 1st Place</div>
                                 <h2 class="manager-name">${managerName}</h2>
                                 <div class="total-points">${points}<span>Total Points</span></div>
@@ -371,24 +371,18 @@
                         let owner1 = cols[3].trim();
                         let goals1 = cols[4] ? cols[4].trim() : '';
                         
-                        let team2 = cols[5].trim();
-                        let owner2 = cols[7].trim();
-                        let goals2 = cols[8] ? cols[8].trim() : '';
+                        // Handle spreadsheet layout changes (Points Earned inserted at cols 5 and 10)
+                        let team2 = cols[6] ? cols[6].trim() : '';
+                        let owner2 = cols[8] ? cols[8].trim() : '';
+                        let goals2 = cols[9] ? cols[9].trim() : '';
 
                         // Only show the game if this manager owns Team 1 OR Team 2
                         if(owner1 === managerName || owner2 === managerName) {
                             
                             let managerPts = 0;
-                            if (goals1 !== '' && cols.length > 14) {
-                                let pts1 = 0;
-                                let pts2 = 0;
-                                if (cols[9]) pts1 += Number(cols[9].trim()) || 0;
-                                if (cols[10]) pts1 += Number(cols[10].trim()) || 0;
-                                if (cols[11]) pts1 += Number(cols[11].trim()) || 0;
-                                
-                                if (cols[12]) pts2 += Number(cols[12].trim()) || 0;
-                                if (cols[13]) pts2 += Number(cols[13].trim()) || 0;
-                                if (cols[14]) pts2 += Number(cols[14].trim()) || 0;
+                            if (goals1 !== '') {
+                                let pts1 = cols[5] ? Number(cols[5].trim()) || 0 : 0;
+                                let pts2 = cols[10] ? Number(cols[10].trim()) || 0 : 0;
 
                                 if (owner1 === managerName) managerPts += pts1;
                                 if (owner2 === managerName) managerPts += pts2;
