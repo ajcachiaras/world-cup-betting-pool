@@ -1,13 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>World Cup 2026 Betting Pool</title>
     <style>
         :root {
-            --primary-color: #4F2683; /* Deep Purple */
-            --accent-color: #FFC62F;  /* Gold */
+            --primary-color: #4F2683;
+            /* Deep Purple */
+            --accent-color: #FFC62F;
+            /* Gold */
             --bg-color: #f4f7f6;
             --card-bg: #ffffff;
             --text-main: #1a1a1a;
@@ -61,7 +64,9 @@
             transition: all 0.2s ease;
         }
 
-        .nav-btn:hover { background-color: #f0e6fa; }
+        .nav-btn:hover {
+            background-color: #f0e6fa;
+        }
 
         .nav-btn.active {
             background-color: var(--primary-color);
@@ -71,29 +76,53 @@
         }
 
         /* --- PAGE CONTAINER STYLES --- */
-        .page-content { display: none; animation: fadeIn 0.3s ease-in-out; }
-        .page-content.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .page-content {
+            display: none;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .page-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
 
         /* --- IFRAME STYLES --- */
-        .iframe-wrapper, .chart-wrapper {
+        .iframe-wrapper,
+        .chart-wrapper {
             background: var(--card-bg);
             padding: 10px;
             border-radius: 12px;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.05);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.05);
             margin-bottom: 20px;
         }
 
         .chart-wrapper {
-            overflow-x: auto; /* Allows charts to scroll horizontally on mobile */
+            overflow-x: auto;
+            /* Allows charts to scroll horizontally on mobile */
             -webkit-overflow-scrolling: touch;
         }
 
-        .sheet-iframe { width: 100%; height: 700px; border: none; border-radius: 8px; }
-        
-        .chart-wrapper iframe { 
-            border: none; 
-            border-radius: 8px; 
+        .sheet-iframe {
+            width: 100%;
+            height: 700px;
+            border: none;
+            border-radius: 8px;
+        }
+
+        .chart-wrapper iframe {
+            border: none;
+            border-radius: 8px;
             display: block;
             margin: 0 auto 20px auto;
         }
@@ -121,92 +150,195 @@
             background: var(--card-bg);
             border-radius: 16px;
             padding: 25px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
             border-top: 6px solid var(--primary-color);
             transition: transform 0.2s ease, box-shadow 0.2s ease;
             position: relative;
             overflow: hidden;
-            cursor: pointer; /* Makes it clear you can click it */
+            cursor: pointer;
+            /* Makes it clear you can click it */
         }
 
         /* Highlight effect when hovering over the card */
         .manager-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 15px 25px rgba(0,0,0,0.15);
+            box-shadow: 0 15px 25px rgba(0, 0, 0, 0.15);
         }
 
         .rank-badge {
-            position: absolute; top: 15px; right: 15px;
-            background: var(--accent-color); color: #000;
-            font-weight: bold; padding: 5px 12px;
-            border-radius: 20px; font-size: 0.8em; display: none; 
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: var(--accent-color);
+            color: #000;
+            font-weight: bold;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            display: none;
         }
 
-        .manager-name { font-size: 1.8em; font-weight: 800; color: var(--primary-color); margin: 0 0 5px 0; }
-        .total-points { font-size: 2.5em; font-weight: 900; color: #1a1a1a; margin: 10px 0 20px 0; line-height: 1; }
-        .total-points span { font-size: 0.35em; color: #888; font-weight: normal; text-transform: uppercase; letter-spacing: 1px; display: block; }
-        .stat-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee; font-size: 0.9em; }
-        .stat-row:last-child { border-bottom: none; }
-        .stat-label { color: #666; font-weight: 500; }
-        .stat-value { font-weight: 700; color: #222; }
-        .loading-text { text-align: center; width: 100%; font-weight: bold; color: var(--primary-color); }
+        .manager-name {
+            font-size: 1.8em;
+            font-weight: 800;
+            color: var(--primary-color);
+            margin: 0 0 5px 0;
+        }
+
+        .total-points {
+            font-size: 2.5em;
+            font-weight: 900;
+            color: #1a1a1a;
+            margin: 10px 0 20px 0;
+            line-height: 1;
+        }
+
+        .total-points span {
+            font-size: 0.35em;
+            color: #888;
+            font-weight: normal;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: block;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+            font-size: 0.9em;
+        }
+
+        .stat-row:last-child {
+            border-bottom: none;
+        }
+
+        .stat-label {
+            color: #666;
+            font-weight: 500;
+        }
+
+        .stat-value {
+            font-weight: 700;
+            color: #222;
+        }
+
+        .loading-text {
+            text-align: center;
+            width: 100%;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
 
         /* --- MODAL (POPUP) STYLES --- */
         .modal-overlay {
-            display: none; /* Hidden by default */
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.6);
+            display: none;
+            /* Hidden by default */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
             z-index: 1000;
-            justify-content: center; align-items: center; padding: 20px;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
             backdrop-filter: blur(4px);
         }
 
         .modal-content {
             background: var(--card-bg);
-            width: 100%; max-width: 900px; max-height: 85vh;
-            border-radius: 16px; padding: 30px;
-            overflow-y: auto; position: relative;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            width: 100%;
+            max-width: 900px;
+            max-height: 85vh;
+            border-radius: 16px;
+            padding: 30px;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
             animation: fadeIn 0.3s ease-out;
         }
 
         .close-btn {
-            position: absolute; top: 20px; right: 20px;
-            background: #eee; color: #333; border: none;
-            border-radius: 50%; width: 35px; height: 35px;
-            font-size: 1.2em; font-weight: bold; cursor: pointer;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #eee;
+            color: #333;
+            border: none;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
             transition: background 0.2s;
         }
 
-        .close-btn:hover { background: #ddd; }
+        .close-btn:hover {
+            background: #ddd;
+        }
 
         .modal-grid {
             display: grid;
-            grid-template-columns: 1fr 2fr; /* Matchups get more space than teams */
-            gap: 30px; margin-top: 20px;
+            grid-template-columns: 1fr 2fr;
+            /* Matchups get more space than teams */
+            gap: 30px;
+            margin-top: 20px;
         }
 
         @media (max-width: 768px) {
-            .modal-grid { grid-template-columns: 1fr; } /* Stack on phones */
+            .modal-grid {
+                grid-template-columns: 1fr;
+            }
+
+            /* Stack on phones */
         }
 
-        .modal-table { width: 100%; border-collapse: collapse; font-size: 0.9em; }
-        .modal-table th, .modal-table td { padding: 10px; border-bottom: 1px solid #eee; text-align: left; }
-        .modal-table th { background: var(--primary-color); color: white; position: sticky; top: 0; }
-        .modal-table tr:hover { background: #f9f9f9; }
-        
+        .modal-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9em;
+        }
+
+        .modal-table th,
+        .modal-table td {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            text-align: left;
+        }
+
+        .modal-table th {
+            background: var(--primary-color);
+            color: white;
+            position: sticky;
+            top: 0;
+        }
+
+        .modal-table tr:hover {
+            background: #f9f9f9;
+        }
+
         /* Highlighting the active manager's team in the matchups */
-        .highlight-team { color: var(--primary-color); font-weight: bold; }
+        .highlight-team {
+            color: var(--primary-color);
+            font-weight: bold;
+        }
     </style>
 </head>
+
 <body>
 
     <h1>World Cup 2026</h1>
 
     <div class="nav-container">
+        <button class="nav-btn" onclick="switchPage('page-rules', this)">Rules</button>
         <button class="nav-btn active" onclick="switchPage('page-leaderboard', this)">Leaderboard</button>
         <button class="nav-btn" onclick="switchPage('page-matrix', this)">Matchup Matrix</button>
         <button class="nav-btn" onclick="switchPage('page-groups', this)">Groups</button>
+        <button class="nav-btn" onclick="switchPage('page-auction', this)">Auction</button>
     </div>
 
     <div id="page-leaderboard" class="page-content active">
@@ -216,28 +348,47 @@
 
         <h2 class="section-title">Visualized Data</h2>
         <div class="chart-wrapper">
-            <iframe width="512" height="531" seamless frameborder="0" scrolling="no" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vQn89D6q684W43YSe7TfH-LFaK7Pmmv9UJMl4ASNj6_kZO1C_eUo41hxHm2mDiQRIlgKwUU-6-41AI6/pubchart?oid=1586620139&amp;format=interactive"></iframe>
-            <iframe width="856" height="531" seamless frameborder="0" scrolling="no" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vQn89D6q684W43YSe7TfH-LFaK7Pmmv9UJMl4ASNj6_kZO1C_eUo41hxHm2mDiQRIlgKwUU-6-41AI6/pubchart?oid=941849445&amp;format=interactive"></iframe>
+            <iframe width="512" height="531" seamless frameborder="0" scrolling="no"
+                src="https://docs.google.com/spreadsheets/d/e/2PACX-1vQn89D6q684W43YSe7TfH-LFaK7Pmmv9UJMl4ASNj6_kZO1C_eUo41hxHm2mDiQRIlgKwUU-6-41AI6/pubchart?oid=1586620139&amp;format=interactive"></iframe>
+            <iframe width="856" height="531" seamless frameborder="0" scrolling="no"
+                src="https://docs.google.com/spreadsheets/d/e/2PACX-1vQn89D6q684W43YSe7TfH-LFaK7Pmmv9UJMl4ASNj6_kZO1C_eUo41hxHm2mDiQRIlgKwUU-6-41AI6/pubchart?oid=941849445&amp;format=interactive"></iframe>
         </div>
     </div>
 
     <div id="page-matrix" class="page-content">
         <div class="iframe-wrapper">
-            <iframe class="sheet-iframe" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vQn89D6q684W43YSe7TfH-LFaK7Pmmv9UJMl4ASNj6_kZO1C_eUo41hxHm2mDiQRIlgKwUU-6-41AI6/pubhtml?gid=182549411&single=true&widget=true&headers=false&chrome=false"></iframe>
+            <iframe class="sheet-iframe"
+                src="https://docs.google.com/spreadsheets/d/e/2PACX-1vQn89D6q684W43YSe7TfH-LFaK7Pmmv9UJMl4ASNj6_kZO1C_eUo41hxHm2mDiQRIlgKwUU-6-41AI6/pubhtml?gid=182549411&single=true&widget=true&headers=false&chrome=false"></iframe>
         </div>
     </div>
 
     <div id="page-groups" class="page-content">
         <div class="iframe-wrapper">
-            <iframe class="sheet-iframe" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vQn89D6q684W43YSe7TfH-LFaK7Pmmv9UJMl4ASNj6_kZO1C_eUo41hxHm2mDiQRIlgKwUU-6-41AI6/pubhtml?gid=812512607&single=true&widget=true&headers=false&chrome=false"></iframe>
+            <iframe class="sheet-iframe"
+                src="https://docs.google.com/spreadsheets/d/e/2PACX-1vQn89D6q684W43YSe7TfH-LFaK7Pmmv9UJMl4ASNj6_kZO1C_eUo41hxHm2mDiQRIlgKwUU-6-41AI6/pubhtml?gid=812512607&single=true&widget=true&headers=false&chrome=false"></iframe>
+        </div>
+    </div>
+
+    <div id="page-rules" class="page-content">
+        <div id="rules-container" style="max-width: 800px; margin: 0 auto; padding-bottom: 40px;">
+            <p class="loading-text">Fetching live rules...</p>
+        </div>
+    </div>
+
+    <div id="page-auction" class="page-content">
+        <div class="iframe-wrapper">
+            <iframe class="sheet-iframe"
+                src="https://docs.google.com/spreadsheets/d/e/2PACX-1vQn89D6q684W43YSe7TfH-LFaK7Pmmv9UJMl4ASNj6_kZO1C_eUo41hxHm2mDiQRIlgKwUU-6-41AI6/pubhtml?gid=1055532209&single=true&widget=true&headers=false&chrome=false"></iframe>
         </div>
     </div>
 
     <div id="manager-modal" class="modal-overlay">
         <div class="modal-content">
             <button class="close-btn" onclick="closeModal()">×</button>
-            <h2 id="modal-title" style="color: var(--primary-color); margin-top: 0; border-bottom: 2px solid var(--accent-color); padding-bottom: 10px;">Manager Portfolio</h2>
-            
+            <h2 id="modal-title"
+                style="color: var(--primary-color); margin-top: 0; border-bottom: 2px solid var(--accent-color); padding-bottom: 10px;">
+                Manager Portfolio</h2>
+
             <div class="modal-grid">
                 <div>
                     <h3 style="margin-top:0;">Owned Teams</h3>
@@ -254,10 +405,11 @@
     <script>
         // --- DATA LINKS ---
         const leaderboardCsvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQn89D6q684W43YSe7TfH-LFaK7Pmmv9UJMl4ASNj6_kZO1C_eUo41hxHm2mDiQRIlgKwUU-6-41AI6/pub?gid=839672240&single=true&output=csv';
-        
+
         // 🚨 PASTE YOUR TWO NEW CSV LINKS HERE 🚨
         const teamsCsvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQn89D6q684W43YSe7TfH-LFaK7Pmmv9UJMl4ASNj6_kZO1C_eUo41hxHm2mDiQRIlgKwUU-6-41AI6/pub?gid=1903481378&single=true&output=csv';
         const gameLogCsvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQn89D6q684W43YSe7TfH-LFaK7Pmmv9UJMl4ASNj6_kZO1C_eUo41hxHm2mDiQRIlgKwUU-6-41AI6/pub?gid=182549411&single=true&output=csv';
+        const rulesCsvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQn89D6q684W43YSe7TfH-LFaK7Pmmv9UJMl4ASNj6_kZO1C_eUo41hxHm2mDiQRIlgKwUU-6-41AI6/pub?gid=770855415&single=true&output=csv';
 
         // --- TAB SWITCHING ---
         function switchPage(pageId, clickedButton) {
@@ -274,28 +426,28 @@
                 const data = await response.text();
                 const rows = data.split('\n');
                 const container = document.getElementById('dashboard-container');
-                container.innerHTML = ''; 
-                
+                container.innerHTML = '';
+
                 const managerColors = {
-                    'Jon': { bg: '#fce8e6', border: '#ea4335' },     // Red
-                    'Yeon': { bg: '#fef7e0', border: '#fbbc04' },    // Yellow
-                    'Andrew': { bg: '#e8f0fe', border: '#4285f4' },  // Blue
-                    'Wyatt': { bg: '#e6f4ea', border: '#34a853' }    // Green
+                    'Jon': { bg: '#f9c7c2', border: '#ea4335' },     // Red
+                    'Yeon': { bg: '#feebb4', border: '#fbbc04' },    // Yellow
+                    'Andrew': { bg: '#c6dafc', border: '#4285f4' },  // Blue
+                    'Wyatt': { bg: '#bdeac9', border: '#34a853' }    // Green
                 };
 
                 for (let i = 1; i < rows.length; i++) {
                     const cols = rows[i].split(',');
-                    if (cols.length > 1) { 
+                    if (cols.length > 1) {
                         const managerName = cols[0].trim();
-                        if (managerName === "Tournament Progress") break; 
-                        
+                        if (managerName === "Tournament Progress") break;
+
                         const mColors = managerColors[managerName];
                         const cardStyle = mColors ? `background-color: ${mColors.bg}; border-top-color: ${mColors.border};` : '';
 
                         const points = cols[1].trim();
                         const teams = cols[2].trim();
                         const gamesPlayed = cols[3].trim();
-                        const pointsPerGame = cols[5] ? cols[5].trim() : '0.0'; 
+                        const pointsPerGame = cols[5] ? cols[5].trim() : '0.0';
 
                         // Notice the new onclick="openModal('Name')" added to the card div
                         const cardHtml = `
@@ -331,21 +483,21 @@
                 const teamData = await teamRes.text();
                 const teamRows = teamData.split('\n');
                 const teamHeaders = teamRows[0].split(',');
-                
+
                 let teamColIndex = -1;
                 let bidColIndex = -1;
 
                 // Find which columns belong to this manager (e.g., "Jon Teams", "Jon Bids")
-                for(let i = 0; i < teamHeaders.length; i++){
-                    if(teamHeaders[i].includes(managerName + " Teams")) teamColIndex = i;
-                    if(teamHeaders[i].includes(managerName + " Bids")) bidColIndex = i;
+                for (let i = 0; i < teamHeaders.length; i++) {
+                    if (teamHeaders[i].includes(managerName + " Teams")) teamColIndex = i;
+                    if (teamHeaders[i].includes(managerName + " Bids")) bidColIndex = i;
                 }
 
                 let teamsHtml = '<table class="modal-table"><tr><th>Team</th><th>Purchased For</th></tr>';
-                for(let i = 1; i < teamRows.length; i++){
+                for (let i = 1; i < teamRows.length; i++) {
                     let cols = teamRows[i].split(',');
                     // If this manager has a team listed in this row, add it to the table
-                    if(teamColIndex > -1 && cols[teamColIndex] && cols[teamColIndex].trim() !== '') {
+                    if (teamColIndex > -1 && cols[teamColIndex] && cols[teamColIndex].trim() !== '') {
                         let teamName = cols[teamColIndex].trim();
                         let bidPrice = bidColIndex > -1 ? cols[bidColIndex].trim() : '-';
                         teamsHtml += `<tr><td>${teamName}</td><td>${bidPrice}</td></tr>`;
@@ -359,26 +511,26 @@
                 const gameRes = await fetch(gameLogCsvUrl);
                 const gameData = await gameRes.text();
                 const gameRows = gameData.split('\n');
-                
+
                 let matchupsHtml = '<table class="modal-table"><tr><th>Group</th><th>Matchup</th><th>Score</th><th>Pts Earned</th></tr>';
-                
-                for(let i = 1; i < gameRows.length; i++){
+
+                for (let i = 1; i < gameRows.length; i++) {
                     let cols = gameRows[i].split(',');
-                    
-                    if(cols.length > 8) {
+
+                    if (cols.length > 8) {
                         let group = cols[0].trim();
                         let team1 = cols[1].trim();
                         let owner1 = cols[3].trim();
                         let goals1 = cols[4] ? cols[4].trim() : '';
-                        
+
                         // Handle spreadsheet layout changes (Points Earned inserted at cols 5 and 10)
                         let team2 = cols[6] ? cols[6].trim() : '';
                         let owner2 = cols[8] ? cols[8].trim() : '';
                         let goals2 = cols[9] ? cols[9].trim() : '';
 
                         // Only show the game if this manager owns Team 1 OR Team 2
-                        if(owner1 === managerName || owner2 === managerName) {
-                            
+                        if (owner1 === managerName || owner2 === managerName) {
+
                             let managerPts = 0;
                             if (goals1 !== '') {
                                 let pts1 = cols[5] ? Number(cols[5].trim()) || 0 : 0;
@@ -391,10 +543,10 @@
                             // Highlight the team owned by the manager currently being viewed
                             let t1Display = owner1 === managerName ? `<span class="highlight-team">${team1}</span>` : team1;
                             let t2Display = owner2 === managerName ? `<span class="highlight-team">${team2}</span>` : team2;
-                            
+
                             // Format the score, or show 'vs' if the game hasn't happened yet
                             let scoreDisplay = (goals1 !== '' && goals2 !== '') ? `<b>${goals1} - ${goals2}</b>` : '<span style="color:#888;">vs</span>';
-                            
+
                             // Format the points earned
                             let ptsDisplay = (goals1 !== '' && goals2 !== '') ? `<b style="color:var(--primary-color)">+${managerPts}</b>` : '<span style="color:#888;">-</span>';
 
@@ -427,13 +579,71 @@
             }
         }
 
+        // --- BUILD RULES PAGE ---
+        async function buildRules() {
+            try {
+                const response = await fetch(rulesCsvUrl);
+                const data = await response.text();
+                const rows = data.split('\n');
+                
+                let html = '';
+                let inTable = false;
+                
+                for (let i = 0; i < rows.length; i++) {
+                    let row = rows[i].trim();
+                    if (!row || row === ',,') continue;
+                    
+                    let cols = [];
+                    let cur = '';
+                    let inQuotes = false;
+                    for (let j = 0; j < row.length; j++) {
+                        let c = row[j];
+                        if (c === '"') inQuotes = !inQuotes;
+                        else if (c === ',' && !inQuotes) { cols.push(cur.trim()); cur = ''; }
+                        else cur += c;
+                    }
+                    cols.push(cur.trim());
+                    
+                    if (cols[0].startsWith('⚽')) {
+                        continue;
+                    } else if (cols[0].startsWith('Scoring Rules')) {
+                        html += `<p style="text-align:center; color: #666; font-size: 1.2em; margin-bottom: 30px;">${cols[0]}</p>`;
+                    } else if (cols[0].match(/^[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}]/u) && !cols[0].startsWith('ℹ️')) {
+                        if (inTable) { html += '</table></div>'; inTable = false; }
+                        html += `<h2 class="section-title" style="display:block; text-align:left;">${cols[0]}</h2>`;
+                    } else if (cols[0] === 'Category' && cols[1] === 'Points') {
+                        if (inTable) { html += '</table></div>'; }
+                        html += `<div class="iframe-wrapper" style="padding: 0; overflow: hidden;"><table class="modal-table" style="margin:0;">
+                                 <tr><th style="border-top-left-radius: 8px;">${cols[0]}</th><th>${cols[1]}</th><th style="border-top-right-radius: 8px;">${cols[2] || 'Notes'}</th></tr>`;
+                        inTable = true;
+                    } else if (cols[0].startsWith('ℹ️')) {
+                        if (inTable) { html += '</table></div>'; inTable = false; }
+                        let text = cols[0].replace('ℹ️', '').trim();
+                        text = text.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" style="color:var(--primary-color);">$1</a>');
+                        html += `<div style="background: #f0e6fa; border-left: 4px solid var(--primary-color); padding: 15px; margin-bottom: 15px; border-radius: 4px;">
+                                    <strong>Note:</strong> ${text}
+                                 </div>`;
+                    } else if (inTable) {
+                        html += `<tr><td><strong>${cols[0]}</strong></td><td style="color:var(--primary-color); font-weight:bold; font-size:1.1em;">+${cols[1]}</td><td style="color:#555;">${cols[2] || ''}</td></tr>`;
+                    }
+                }
+                if (inTable) { html += '</table></div>'; }
+                
+                document.getElementById('rules-container').innerHTML = html;
+                
+            } catch (e) {
+                console.error(e);
+                document.getElementById('rules-container').innerHTML = '<p class="loading-text" style="color:red;">Error loading rules.</p>';
+            }
+        }
+
         // --- CLOSE MODAL ---
         function closeModal() {
             document.getElementById('manager-modal').style.display = 'none';
         }
 
         // Allows closing the modal by clicking anywhere in the dark background
-        window.onclick = function(event) {
+        window.onclick = function (event) {
             let modal = document.getElementById('manager-modal');
             if (event.target === modal) {
                 closeModal();
@@ -442,7 +652,9 @@
 
         // Initialize
         buildDashboard();
+        buildRules();
     </script>
 
 </body>
+
 </html>
