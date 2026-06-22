@@ -326,6 +326,73 @@
             color: var(--primary-color);
             font-weight: bold;
         }
+
+        /* --- TOURNAMENT PROGRESS BARS --- */
+        .progress-section {
+            max-width: 700px;
+            margin: 0 auto 30px auto;
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 24px 30px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.07);
+        }
+
+        .progress-section h3 {
+            margin: 0 0 20px 0;
+            font-size: 1em;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #888;
+            font-weight: 600;
+        }
+
+        .progress-item {
+            margin-bottom: 18px;
+        }
+
+        .progress-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .progress-label-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 8px;
+        }
+
+        .progress-label {
+            font-weight: 600;
+            font-size: 0.95em;
+            color: #444;
+        }
+
+        .progress-value {
+            font-weight: 700;
+            font-size: 1.05em;
+            color: var(--primary-color);
+        }
+
+        .progress-track {
+            background: #ede9f6;
+            border-radius: 99px;
+            height: 14px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 99px;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+            transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 0%;
+        }
+
+        .progress-meta {
+            font-size: 0.8em;
+            color: #999;
+            margin-top: 5px;
+        }
     </style>
 </head>
 
@@ -342,6 +409,26 @@
     </div>
 
     <div id="page-leaderboard" class="page-content active">
+
+        <div class="progress-section">
+            <h3>⚽ Tournament Progress</h3>
+            <div class="progress-item">
+                <div class="progress-label-row">
+                    <span class="progress-label">Group Stage</span>
+                    <span class="progress-value" id="group-stage-pct">—</span>
+                </div>
+                <div class="progress-track"><div class="progress-fill" id="group-stage-bar"></div></div>
+            </div>
+            <div class="progress-item">
+                <div class="progress-label-row">
+                    <span class="progress-label">Overall Tournament</span>
+                    <span class="progress-value" id="tournament-pct">—</span>
+                </div>
+                <div class="progress-track"><div class="progress-fill" id="tournament-bar"></div></div>
+                <div class="progress-meta" id="games-played-label"></div>
+            </div>
+        </div>
+
         <div class="card-grid" id="dashboard-container">
             <p class="loading-text">Fetching live leaderboard data...</p>
         </div>
@@ -352,6 +439,13 @@
                 src="https://docs.google.com/spreadsheets/d/e/2PACX-1vQn89D6q684W43YSe7TfH-LFaK7Pmmv9UJMl4ASNj6_kZO1C_eUo41hxHm2mDiQRIlgKwUU-6-41AI6/pubchart?oid=1586620139&amp;format=interactive"></iframe>
             <iframe width="856" height="531" seamless frameborder="0" scrolling="no"
                 src="https://docs.google.com/spreadsheets/d/e/2PACX-1vQn89D6q684W43YSe7TfH-LFaK7Pmmv9UJMl4ASNj6_kZO1C_eUo41hxHm2mDiQRIlgKwUU-6-41AI6/pubchart?oid=941849445&amp;format=interactive"></iframe>
+        </div>
+
+        <h2 class="section-title">Detailed Stats</h2>
+        <div class="iframe-wrapper" style="overflow-x: auto; padding: 0; margin-bottom: 30px;">
+            <table id="detailed-stats-table" class="modal-table" style="white-space: nowrap; margin: 0 auto; text-align: center;">
+                <tr><td><p class="loading-text">Fetching stats...</p></td></tr>
+            </table>
         </div>
 
         <h2 class="section-title">Matchup Matrix</h2>
@@ -446,103 +540,178 @@
                     'Wyatt': { bg: '#bdeac9', border: '#34a853' }    // Green
                 };
 
-                for (let i = 1; i < rows.length; i++) {
-                    const cols = rows[i].split(',');
-                    if (cols.length > 1) {
-                        const managerName = cols[0].trim();
-                        if (managerName === "Tournament Progress") break;
+                // --- Find the leaderboard section header row (Rank, Manager, Total Points, ...) ---
+                let leaderHeaderIdx = -1;
+                let matrixHeaderIdx = -1;
+                for (let i = 0; i < rows.length; i++) {
+                    const cells = rows[i].split(',');
+                    const c0 = cells[0] ? cells[0].trim() : '';
+                    const c1 = cells[1] ? cells[1].trim() : '';
+                    if (c0 === 'Rank' && c1 === 'Manager') leaderHeaderIdx = i;
+                    if (c0 === 'Manager' && c1 === 'Points') matrixHeaderIdx = i;
 
+                    // "Tournament Progress,,,54.2%,% Group Stage Done"
+                    if (c0 === 'Tournament Progress') {
+                        const groupPct = cells[3] ? cells[3].trim() : '';
+                        if (groupPct) {
+                            document.getElementById('group-stage-pct').textContent = groupPct;
+                            setTimeout(() => { document.getElementById('group-stage-bar').style.width = groupPct; }, 100);
+                        }
+                    }
+                    // "39,Games Played,,37.5%,% Tournament Done"
+                    if (c1 === 'Games Played') {
+                        const tournPct = cells[3] ? cells[3].trim() : '';
+                        if (tournPct) {
+                            document.getElementById('tournament-pct').textContent = tournPct;
+                            document.getElementById('games-played-label').textContent = `${c0} games played`;
+                            setTimeout(() => { document.getElementById('tournament-bar').style.width = tournPct; }, 200);
+                        }
+                    }
+                }
+
+                // --- Build manager cards ---
+                if (leaderHeaderIdx !== -1) {
+                    let rank = 0;
+                    for (let i = leaderHeaderIdx + 1; i < rows.length; i++) {
+                        const cols = rows[i].split(',');
+                        const managerName = cols[1] ? cols[1].trim() : '';
+                        if (!managerName || managerName === 'Tournament Progress') break;
+
+                        rank++;
                         const mColors = managerColors[managerName];
                         const cardStyle = mColors ? `background-color: ${mColors.bg}; border-top-color: ${mColors.border};` : '';
 
-                        const points = cols[1].trim();
-                        const teams = cols[2].trim();
-                        const gamesPlayed = cols[3].trim();
-                        const pointsPerGame = cols[5] ? cols[5].trim() : '0.0';
+                        const points     = cols[2] ? cols[2].trim() : '0';
+                        const ptsPerTeam = cols[3] ? cols[3].trim() : '0';
+                        const goals      = cols[4] ? cols[4].trim() : '0';
+                        const winsAdv    = cols[5] ? cols[5].trim() : '0';
+                        const upsets     = cols[6] ? cols[6].trim() : '0';
 
-                        // Notice the new onclick="openModal('Name')" added to the card div
                         const cardHtml = `
                             <div class="manager-card" style="${cardStyle}" onclick="openModal('${managerName}')">
-                                <div class="rank-badge" style="display: ${i === 1 ? 'block' : 'none'}">🏆 1st Place</div>
+                                <div class="rank-badge" style="display: ${rank === 1 ? 'block' : 'none'}">🏆 1st Place</div>
                                 <h2 class="manager-name">${managerName}</h2>
                                 <div class="total-points">${points}<span>Total Points</span></div>
-                                <div class="stat-row"><span class="stat-label">Teams Owned</span><span class="stat-value">${teams}</span></div>
-                                <div class="stat-row"><span class="stat-label">Games Played</span><span class="stat-value">${gamesPlayed}</span></div>
-                                <div class="stat-row"><span class="stat-label">Points / Game</span><span class="stat-value">${pointsPerGame}</span></div>
+                                <div class="stat-row"><span class="stat-label">Pts / Team</span><span class="stat-value">${ptsPerTeam}</span></div>
+                                <div class="stat-row"><span class="stat-label">Goals</span><span class="stat-value">${goals}</span></div>
+                                <div class="stat-row"><span class="stat-label">Wins & Advancing</span><span class="stat-value">${winsAdv}</span></div>
+                                <div class="stat-row"><span class="stat-label">Upset Pts</span><span class="stat-value">${upsets}</span></div>
                             </div>
                         `;
                         container.innerHTML += cardHtml;
                     }
                 }
 
-                // Build Matchup Matrix
-                let matrixColIdx = rows[0].split(',').findIndex(c => c.trim() === 'Matchup Matrix');
-                if (matrixColIdx !== -1) {
-                    let hCols = rows[0].split(',');
+                // --- Build Detailed Stats and Matchup Matrix from their own header section ---
+                if (matrixHeaderIdx !== -1) {
+                    let hCols = rows[matrixHeaderIdx].split(',');
 
-                    // First pass: Extract data and find min/max
-                    let matrixData = [];
-                    let minVal = Infinity;
-                    let maxVal = -Infinity;
+                    // --- Build Detailed Stats Table ---
+                    let endColIdx = hCols.findIndex(c => c.trim() === 'Matchup Matrix');
+                    if (endColIdx === -1) endColIdx = hCols.length;
+                    
+                    let actualEndColIdx = endColIdx - 1;
+                    while (actualEndColIdx >= 0 && !hCols[actualEndColIdx].trim()) {
+                        actualEndColIdx--;
+                    }
 
-                    for (let i = 1; i < rows.length; i++) {
-                        const cols = rows[i].split(',');
-                        if (cols.length > matrixColIdx) {
-                            let mName = cols[matrixColIdx].trim();
+                    if (actualEndColIdx >= 0) {
+                        let statsHtml = '<thead><tr>';
+                        for (let c = 0; c <= actualEndColIdx; c++) {
+                            let headerName = hCols[c].trim();
+                            if (c === 0) {
+                                statsHtml += `<th style="text-align: left; position: sticky; left: 0; z-index: 2; background-color: var(--primary-color);">${headerName}</th>`;
+                            } else {
+                                statsHtml += `<th>${headerName}</th>`;
+                            }
+                        }
+                        statsHtml += '</tr></thead><tbody>';
 
-                            if (!mName) continue;
-                            if (mName === "Tournament Progress") break;
+                        for (let i = matrixHeaderIdx + 1; i < rows.length; i++) {
+                            const cols = rows[i].split(',');
+                            if (cols.length > actualEndColIdx) {
+                                let mName = cols[0].trim();
+                                if (!mName) continue;
+                                if (mName === 'Tournament Progress') break;
 
-                            let rowVals = [];
-                            for (let c = 1; c <= 4; c++) {
-                                let valStr = cols[matrixColIdx + c] ? cols[matrixColIdx + c].trim() : '';
-                                let val = parseFloat(valStr);
-
-                                rowVals.push({ valStr, val });
-
-                                if (!isNaN(val)) {
-                                    if (val < minVal) minVal = val;
-                                    if (val > maxVal) maxVal = val;
+                                let mColors = managerColors[mName] || { bg: '#fff', border: '#ccc' };
+                                statsHtml += `<tr>`;
+                                for (let c = 0; c <= actualEndColIdx; c++) {
+                                    let val = cols[c] ? cols[c].trim() : '';
+                                    if (c === 0) {
+                                        statsHtml += `<td style="font-weight: bold; background-color: ${mColors.bg}; border-right: 2px solid ${mColors.border}; position: sticky; left: 0; z-index: 1;">${val}</td>`;
+                                    } else {
+                                        statsHtml += `<td>${val}</td>`;
+                                    }
                                 }
+                                statsHtml += `</tr>`;
                             }
-                            matrixData.push({ mName, rowVals });
                         }
+                        statsHtml += '</tbody>';
+                        const statsContainer = document.getElementById('detailed-stats-table');
+                        if (statsContainer) statsContainer.innerHTML = statsHtml;
                     }
 
-                    if (minVal === Infinity) { minVal = 0; maxVal = 10; }
-                    let range = maxVal - minVal;
-                    if (range === 0) range = 1;
+                    // --- Build Matchup Matrix ---
+                    let matrixColIdx = hCols.findIndex(c => c.trim() === 'Matchup Matrix');
 
-                    let matrixHtml = '<thead><tr>';
-                    // Header
-                    matrixHtml += `<th style="text-align: left;">${hCols[matrixColIdx].trim()}</th>`;
-                    for (let c = 1; c <= 4; c++) {
-                        let opName = hCols[matrixColIdx + c] ? hCols[matrixColIdx + c].trim() : '';
-                        let mColors = managerColors[opName] || { bg: '#eee', border: '#ccc' };
-                        matrixHtml += `<th style="background-color: ${mColors.bg}; color: #333; text-align: center; border-bottom: 2px solid ${mColors.border};">${opName}</th>`;
-                    }
-                    matrixHtml += '</tr></thead><tbody>';
+                    if (matrixColIdx !== -1) {
+                        let matrixData = [];
+                        let minVal = Infinity;
+                        let maxVal = -Infinity;
 
-                    for (let r = 0; r < matrixData.length; r++) {
-                        let row = matrixData[r];
-                        let mColors = managerColors[row.mName] || { bg: '#eee', border: '#ccc' };
-                        matrixHtml += `<tr>`;
-                        matrixHtml += `<td style="font-weight: bold; background-color: ${mColors.bg}; border-right: 2px solid ${mColors.border};">${row.mName}</td>`;
+                        for (let i = matrixHeaderIdx + 1; i < rows.length; i++) {
+                            const cols = rows[i].split(',');
+                            if (cols.length > matrixColIdx) {
+                                let mName = cols[matrixColIdx].trim();
+                                if (!mName) continue;
+                                if (mName === 'Tournament Progress') break;
 
-                        for (let c = 0; c < row.rowVals.length; c++) {
-                            let cell = row.rowVals[c];
-                            let hue = 60;
-                            if (!isNaN(cell.val)) {
-                                hue = ((cell.val - minVal) / range) * 120;
+                                let rowVals = [];
+                                for (let c = 1; c <= 4; c++) {
+                                    let valStr = cols[matrixColIdx + c] ? cols[matrixColIdx + c].trim() : '';
+                                    let val = parseFloat(valStr);
+                                    rowVals.push({ valStr, val });
+                                    if (!isNaN(val)) {
+                                        if (val < minVal) minVal = val;
+                                        if (val > maxVal) maxVal = val;
+                                    }
+                                }
+                                matrixData.push({ mName, rowVals });
                             }
-                            let bgColor = `hsl(${hue}, 85%, 88%)`;
-                            matrixHtml += `<td style="text-align: center; font-weight: bold; font-size: 1.1em; background-color: ${bgColor};">${cell.valStr}</td>`;
                         }
-                        matrixHtml += `</tr>`;
+
+                        if (minVal === Infinity) { minVal = 0; maxVal = 10; }
+                        let range = maxVal - minVal;
+                        if (range === 0) range = 1;
+
+                        let matrixHtml = '<thead><tr>';
+                        matrixHtml += `<th style="text-align: left;">${hCols[matrixColIdx].trim()}</th>`;
+                        for (let c = 1; c <= 4; c++) {
+                            let opName = hCols[matrixColIdx + c] ? hCols[matrixColIdx + c].trim() : '';
+                            let mColors = managerColors[opName] || { bg: '#eee', border: '#ccc' };
+                            matrixHtml += `<th style="background-color: ${mColors.bg}; color: #333; text-align: center; border-bottom: 2px solid ${mColors.border};">${opName}</th>`;
+                        }
+                        matrixHtml += '</tr></thead><tbody>';
+
+                        for (let r = 0; r < matrixData.length; r++) {
+                            let row = matrixData[r];
+                            let mColors = managerColors[row.mName] || { bg: '#eee', border: '#ccc' };
+                            matrixHtml += `<tr>`;
+                            matrixHtml += `<td style="font-weight: bold; background-color: ${mColors.bg}; border-right: 2px solid ${mColors.border};">${row.mName}</td>`;
+                            for (let c = 0; c < row.rowVals.length; c++) {
+                                let cell = row.rowVals[c];
+                                let hue = 60;
+                                if (!isNaN(cell.val)) hue = ((cell.val - minVal) / range) * 120;
+                                let bgColor = `hsl(${hue}, 85%, 88%)`;
+                                matrixHtml += `<td style="text-align: center; font-weight: bold; font-size: 1.1em; background-color: ${bgColor};">${cell.valStr}</td>`;
+                            }
+                            matrixHtml += `</tr>`;
+                        }
+                        matrixHtml += '</tbody>';
+                        const matrixContainer = document.getElementById('leaderboard-matrix');
+                        if (matrixContainer) matrixContainer.innerHTML = matrixHtml;
                     }
-                    matrixHtml += '</tbody>';
-                    const matrixContainer = document.getElementById('leaderboard-matrix');
-                    if (matrixContainer) matrixContainer.innerHTML = matrixHtml;
                 }
             } catch (error) {
                 console.error(error);
